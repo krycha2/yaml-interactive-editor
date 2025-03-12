@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -17,18 +18,12 @@ interface YamlFormProps {
   onValueChange: (path: string, value: any) => void;
 }
 
-interface YamlDisplay {
-  name: string;
-  type: string;
-  'lore-normal': string[];
-  'lore-started': string[];
-}
-
 const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
   const [parsedYaml, setParsedYaml] = useState<YamlData | null>(null);
   const [activeTab, setActiveTab] = useState("tasks");
   const [error, setError] = useState<string | null>(null);
 
+  // Parse YAML when it changes
   useEffect(() => {
     try {
       const parsed = parseYaml(yamlString);
@@ -40,10 +35,12 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
     }
   }, [yamlString]);
 
+  // Handle input changes
   const handleInputChange = (path: string, newValue: any) => {
     onValueChange(path, newValue);
   };
 
+  // Format number for display
   const formatNumber = (value: number): string => {
     if (value >= 86400) {
       const days = Math.floor(value / 86400);
@@ -94,6 +91,7 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
+            {/* Tasks Tab */}
             <TabsContent value="tasks" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">
@@ -184,6 +182,7 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
               </Card>
             </TabsContent>
 
+            {/* Display Tab */}
             <TabsContent value="display" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">
@@ -198,9 +197,9 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
                       <Label htmlFor="displayName">Display Name</Label>
                       <Input 
                         id="displayName" 
-                        value={parsedYaml?.display?.name || ''}
+                        value={parsedYaml.display.name || ''}
                         onChange={(e) => handleInputChange('display.name', e.target.value)}
-                        className="input-field bg-wood-gradient text-white font-bold"
+                        className="input-field"
                       />
                     </div>
                     
@@ -240,6 +239,7 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
               </Card>
             </TabsContent>
 
+            {/* Rewards Tab */}
             <TabsContent value="rewards" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">
@@ -276,6 +276,7 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
               </Card>
             </TabsContent>
 
+            {/* Options Tab */}
             <TabsContent value="options" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">

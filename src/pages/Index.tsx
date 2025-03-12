@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Toaster } from "@/components/ui/sonner";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
@@ -11,15 +12,19 @@ import Header from "@/components/Header";
 import { defaultYaml, updateYamlValue } from "@/utils/yamlUtils";
 import { motion } from "framer-motion";
 
+// Add dependencies for animation
+import { animate, useMotionValue } from "framer-motion";
+
 const Index = () => {
   const [yamlContent, setYamlContent] = useState(defaultYaml);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('editor');
   const isMobile = useIsMobile();
   
+  // Animation properties
   const opacity = useMotionValue(0);
   
   useEffect(() => {
+    // Simulate loading time for a smooth entrance
     const timer = setTimeout(() => {
       setLoading(false);
       animate(opacity, 1, { duration: 0.8 });
@@ -28,6 +33,7 @@ const Index = () => {
     return () => clearTimeout(timer);
   }, []);
   
+  // Handle value changes from the form
   const handleFormValueChange = (path: string, value: any) => {
     try {
       const newYaml = updateYamlValue(yamlContent, path, value);
@@ -38,6 +44,7 @@ const Index = () => {
     }
   };
   
+  // Handle export, import and copy operations
   const handleExport = () => {
     try {
       const blob = new Blob([yamlContent], { type: 'text/yaml' });
@@ -108,7 +115,7 @@ const Index = () => {
   
   return (
     <motion.div 
-      className="min-h-screen bg-background flex flex-col dark:bg-[#1A1F2C]"
+      className="min-h-screen bg-background flex flex-col"
       style={{ opacity }}
     >
       <Toaster position="top-right" />
@@ -120,6 +127,7 @@ const Index = () => {
       />
       
       {isMobile ? (
+        // Mobile layout with tabs
         <div className="flex flex-col h-screen p-4 space-y-4">
           <div className="flex space-x-2 mb-4">
             <Button 
@@ -153,6 +161,7 @@ const Index = () => {
           )}
         </div>
       ) : (
+        // Desktop layout with panels
         <ResizablePanelGroup
           direction="horizontal"
           className="min-h-[calc(100vh-58px)]"
