@@ -34,3 +34,28 @@ export const getGradientTextJSX = (
   const gradientClass = `bg-gradient-to-r ${gradient} bg-clip-text text-transparent ${className}`;
   return { className: gradientClass, text };
 };
+
+// Function to generate gradient from Birdflop API
+export const getBirdflopGradient = async (text: string): Promise<string> => {
+  try {
+    const response = await fetch(`https://www.birdflop.com/api/v2/gradient?text=${encodeURIComponent(text)}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch gradient');
+    }
+    const data = await response.json();
+    return data.result || text;
+  } catch (error) {
+    console.error('Error fetching gradient:', error);
+    return text;
+  }
+};
+
+// Generate a filename based on category, task number, and block number
+export const generateTaskFilename = (
+  category: string, 
+  taskNumber: number,
+  blockNumber: number
+): string => {
+  return `${category[0].toUpperCase()}${taskNumber}_${blockNumber}`;
+};
+
