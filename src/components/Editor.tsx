@@ -1,3 +1,4 @@
+
 import React, { useRef, useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { Separator } from '@/components/ui/separator';
@@ -108,16 +109,28 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
         <div className="w-14"></div>
       </div>
       <Separator />
-      <div 
-        ref={editorRef} 
-        className="w-full flex-1" 
-        style={{ 
-          height, 
-          overflow: "hidden",
-          borderRadius: "0 0 var(--radius) var(--radius)",
-          background: "var(--editor-bg)"
-        }}
-      />
+      {!isMounted ? (
+        <div 
+          className="w-full flex-1 bg-black flex items-center justify-center" 
+          style={{ height }}
+        >
+          <div className="text-white text-center">
+            <div className="animate-pulse mb-2">Loading Editor...</div>
+            <div className="text-xs text-gray-400">Please wait while the YAML editor initializes</div>
+          </div>
+        </div>
+      ) : (
+        <div 
+          ref={editorRef} 
+          className="w-full flex-1" 
+          style={{ 
+            height, 
+            overflow: "hidden",
+            borderRadius: "0 0 var(--radius) var(--radius)",
+            background: "var(--editor-bg)"
+          }}
+        />
+      )}
     </div>
   );
 };
