@@ -7,6 +7,9 @@ export interface EditorSettings {
   useNumberInputForSort: boolean;
   defaultTaskPrefix: string;
   saveFilenamePatternsEnabled: boolean;
+  gradientPresetEnabled: boolean;
+  customGradients: Record<string, string>;
+  blockPalette: string[];
 }
 
 const SETTINGS_KEY = 'yaml-editor-settings';
@@ -18,7 +21,14 @@ export const DEFAULT_SETTINGS: EditorSettings = {
   categories: ['Drwala', 'Górnika', 'Farmera', 'Łowcy', 'Budowniczego'],
   useNumberInputForSort: false,
   defaultTaskPrefix: '',
-  saveFilenamePatternsEnabled: true
+  saveFilenamePatternsEnabled: true,
+  gradientPresetEnabled: true,
+  customGradients: {
+    'wood': 'from-amber-700 via-amber-800 to-amber-900',
+    'water': 'from-blue-400 via-cyan-500 to-blue-600',
+    'fire': 'from-orange-500 via-red-600 to-rose-700'
+  },
+  blockPalette: ['OAK_LOG', 'STONE', 'DIAMOND_ORE']
 };
 
 export const loadSettings = (): EditorSettings => {

@@ -10,7 +10,7 @@ import Editor from "@/components/Editor";
 import YamlForm from "@/components/YamlForm";
 import Header from "@/components/Header";
 import SettingsPanel from "@/components/SettingsPanel";
-import { defaultYaml, updateYamlValue } from "@/utils/yamlUtils";
+import { defaultYaml, updateYamlValue, parseYaml } from "@/utils/yamlUtils";
 import { motion, AnimatePresence } from "framer-motion";
 import { loadSettings, saveSettings, EditorSettings } from "@/utils/settingsStorage";
 
@@ -63,10 +63,10 @@ const Index = () => {
       let filename = 'exported-task.yaml';
       if (settings.saveFilenamePatternsEnabled) {
         try {
-          const yamlObj = JSON.parse(JSON.stringify(require('js-yaml').load(yamlContent)));
-          const category = yamlObj.options?.category || 'task';
+          const yamlObj = parseYaml(yamlContent);
+          const category = yamlObj.options?.category?.replace(/"/g, '') || 'task';
           const sortOrder = yamlObj.options?.['sort-order'] || 1;
-          const blockType = yamlObj.display?.type || 'block';
+          const blockType = yamlObj.display?.type?.replace(/"/g, '') || 'block';
           filename = `${category[0]}${sortOrder}_${blockType}.yaml`.toLowerCase();
         } catch (e) {
           console.error("Error generating filename", e);

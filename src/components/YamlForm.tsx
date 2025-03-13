@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -18,6 +17,7 @@ import { getGradientText, gradients, getGradientTextJSX, getBirdflopGradient } f
 import { EditorSettings } from '@/utils/settingsStorage';
 import RewardCustomizer from './RewardCustomizer';
 import { Edit, ArrowDown, ArrowUp } from 'lucide-react';
+import { toast } from "sonner";
 
 interface YamlFormProps {
   yamlString: string;
@@ -54,7 +54,6 @@ const YamlForm: React.FC<YamlFormProps> = ({
 
   useEffect(() => {
     if (parsedYaml?.display?.name && useGradientText) {
-      // Try to generate from API
       const fetchGradient = async () => {
         try {
           const cleanName = parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '');
@@ -71,14 +70,16 @@ const YamlForm: React.FC<YamlFormProps> = ({
   }, [parsedYaml?.display?.name, useGradientText]);
 
   const handleInputChange = (path: string, newValue: any) => {
-    onValueChange(path, newValue);
-    
-    // Special handling for block type in tasks to update display type
-    if (path === 'tasks.stone.block') {
-      onValueChange('display.type', newValue);
+    if (path === 'tasks.stone.type' || path === 'tasks.stone.block' || path === 'options.category') {
+      onValueChange(path, `"${newValue}"`);
+      
+      if (path === 'tasks.stone.block') {
+        onValueChange('display.type', `"${newValue}"`);
+      }
+    } else {
+      onValueChange(path, newValue);
     }
     
-    // Special handling for category selection
     if (path === 'options.category') {
       setActiveCategory(newValue);
     }
@@ -395,12 +396,12 @@ const YamlForm: React.FC<YamlFormProps> = ({
                     <div className="space-y-2">
                       <Label>Reward Commands</Label>
                       
-                      {parsedYaml.rewards?.map((reward, index) => (
+                      {Array.isArray(parsedYaml.rewards) && parsedYaml.rewards.map((reward, index) => (
                         <div key={index} className="flex items-center space-x-2 my-2">
                           <RewardCustomizer 
                             rewardString={reward}
                             onChange={(newReward) => {
-                              const newRewards = [...parsedYaml.rewards];
+                              const newRewards = [...(parsedYaml.rewards || [])];
                               newRewards[index] = newReward;
                               handleInputChange('rewards', newRewards);
                             }}
@@ -412,7 +413,7 @@ const YamlForm: React.FC<YamlFormProps> = ({
                               size="icon"
                               onClick={() => {
                                 if (index > 0) {
-                                  const newRewards = [...parsedYaml.rewards];
+                                  const newRewards = [...(parsedYaml.rewards || [])];
                                   [newRewards[index], newRewards[index - 1]] = [newRewards[index - 1], newRewards[index]];
                                   handleInputChange('rewards', newRewards);
                                 }
@@ -425,13 +426,13 @@ const YamlForm: React.FC<YamlFormProps> = ({
                               variant="ghost" 
                               size="icon"
                               onClick={() => {
-                                if (index < parsedYaml.rewards.length - 1) {
-                                  const newRewards = [...parsedYaml.rewards];
+                                if (index < (parsedYaml.rewards || []).length - 1) {
+                                  const newRewards = [...(parsedYaml.rewards || [])];
                                   [newRewards[index], newRewards[index + 1]] = [newRewards[index + 1], newRewards[index]];
                                   handleInputChange('rewards', newRewards);
                                 }
                               }}
-                              disabled={index === parsedYaml.rewards.length - 1}
+                              disabled={index === (parsedYaml.rewards || []).length - 1}
                             >
                               <ArrowDown className="h-4 w-4" />
                             </Button>
@@ -455,12 +456,12 @@ const YamlForm: React.FC<YamlFormProps> = ({
                       <Label htmlFor="rewardMessages">Reward Messages</Label>
                       <Textarea 
                         id="rewardMessages" 
-                        value={parsedYaml.rewardstring?.join('\n') || ''}
+                        value={Array.isArray(parsedYaml.rewardstring) ? parsedYaml.rewardstring.join('\n') : ''}
                         onChange={(e) => handleInputChange('rewardstring', e.target.value.split('\n'))}
                         className="input-field min-h-[100px]"
                         placeholder="Enter each reward message on a new line"
                       />
-                      {useGradientText && parsedYaml.rewardstring?.length > 0 && (
+                      {useGradientText && Array.isArray(parsedYaml.rewardstring) && parsedYaml.rewardstring.length > 0 && (
                         <div className="mt-2 p-2 border rounded-md bg-background/50">
                           <p className="text-sm text-muted-foreground mb-1">Preview:</p>
                           <div className={getGradientText("Task completed!", gradients.blue)}>
