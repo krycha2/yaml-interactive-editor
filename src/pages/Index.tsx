@@ -10,16 +10,19 @@ import Editor from "@/components/Editor";
 import YamlForm from "@/components/YamlForm";
 import Header from "@/components/Header";
 import SettingsPanel from "@/components/SettingsPanel";
-import { defaultYaml, updateYamlValue, parseYaml } from "@/utils/yamlUtils";
+import { defaultYaml, updateYamlValue } from "@/utils/yamlUtils";
 import { motion, AnimatePresence } from "framer-motion";
-import { loadSettings, saveSettings, EditorSettings } from "@/utils/settingsStorage";
 
 const Index = () => {
   const [yamlContent, setYamlContent] = useState(defaultYaml);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("editor");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [settings, setSettings] = useState(loadSettings());
+  const [settings, setSettings] = useState({
+    darkMode: false,
+    editorTheme: 'vs-light',
+    gradientTextEnabled: true
+  });
   const isMobile = useIsMobile();
   
   // Apply dark mode effect
@@ -58,22 +61,7 @@ const Index = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      
-      // Generate filename based on settings if enabled
-      let filename = 'exported-task.yaml';
-      if (settings.saveFilenamePatternsEnabled) {
-        try {
-          const yamlObj = parseYaml(yamlContent);
-          const category = yamlObj.options?.category?.replace(/"/g, '') || 'task';
-          const sortOrder = yamlObj.options?.['sort-order'] || 1;
-          const blockType = yamlObj.display?.type?.replace(/"/g, '') || 'block';
-          filename = `${category[0]}${sortOrder}_${blockType}.yaml`.toLowerCase();
-        } catch (e) {
-          console.error("Error generating filename", e);
-        }
-      }
-      
-      a.download = filename;
+      a.download = 'exported-task.yaml';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -124,9 +112,8 @@ const Index = () => {
     }
   };
 
-  const handleSettingsChange = (newSettings: EditorSettings) => {
+  const handleSettingsChange = (newSettings: typeof settings) => {
     setSettings(newSettings);
-    saveSettings(newSettings);
   };
   
   if (loading) {
@@ -192,7 +179,7 @@ const Index = () => {
                   value={yamlContent} 
                   onChange={setYamlContent}
                   height="calc(100vh - 120px)"
-                  theme={settings.darkMode ? 'vs-dark' : settings.editorTheme}
+                  theme={settings.darkMode ? 'vs-dark' : 'vs-light'}
                 />
               </motion.div>
             ) : (
@@ -209,7 +196,6 @@ const Index = () => {
                     yamlString={yamlContent} 
                     onValueChange={handleFormValueChange} 
                     useGradientText={settings.gradientTextEnabled}
-                    settings={settings}
                   />
                 </ScrollArea>
               </motion.div>
@@ -226,7 +212,7 @@ const Index = () => {
             <Editor 
               value={yamlContent} 
               onChange={setYamlContent} 
-              theme={settings.darkMode ? 'vs-dark' : settings.editorTheme}
+              theme={settings.darkMode ? 'vs-dark' : 'vs-light'}
             />
           </ResizablePanel>
           
@@ -238,7 +224,6 @@ const Index = () => {
                 yamlString={yamlContent} 
                 onValueChange={handleFormValueChange} 
                 useGradientText={settings.gradientTextEnabled}
-                settings={settings}
               />
             </ScrollArea>
           </ResizablePanel>

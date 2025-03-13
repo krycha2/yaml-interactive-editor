@@ -13,38 +13,23 @@ import { YamlData, parseYaml, getValueAtPath } from '@/utils/yamlUtils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { taskTypes, blockTypes } from '@/data/typeDatabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getGradientText, gradients, getGradientTextJSX, getBirdflopGradient } from '@/utils/gradientUtils';
-import { EditorSettings } from '@/utils/settingsStorage';
-import RewardCustomizer from './RewardCustomizer';
-import { Edit, ArrowDown, ArrowUp } from 'lucide-react';
-import { toast } from "sonner";
+import { getGradientText, gradients, getGradientTextJSX } from '@/utils/gradientUtils';
 
 interface YamlFormProps {
   yamlString: string;
   onValueChange: (path: string, value: any) => void;
   useGradientText?: boolean;
-  settings?: EditorSettings;
 }
 
-const YamlForm: React.FC<YamlFormProps> = ({ 
-  yamlString, 
-  onValueChange, 
-  useGradientText = true,
-  settings
-}) => {
+const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradientText = true }) => {
   const [parsedYaml, setParsedYaml] = useState<YamlData | null>(null);
   const [activeTab, setActiveTab] = useState("tasks");
   const [error, setError] = useState<string | null>(null);
-  const [gradientPreview, setGradientPreview] = useState("");
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
 
   useEffect(() => {
     try {
       const parsed = parseYaml(yamlString);
       setParsedYaml(parsed);
-      if (parsed.options?.category) {
-        setActiveCategory(parsed.options.category);
-      }
       setError(null);
     } catch (err) {
       setError("Invalid YAML format");
@@ -52,37 +37,8 @@ const YamlForm: React.FC<YamlFormProps> = ({
     }
   }, [yamlString]);
 
-  useEffect(() => {
-    if (parsedYaml?.display?.name && useGradientText) {
-      const fetchGradient = async () => {
-        try {
-          const cleanName = parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '');
-          const result = await getBirdflopGradient(cleanName);
-          setGradientPreview(result);
-        } catch (error) {
-          console.error("Failed to fetch gradient:", error);
-          setGradientPreview("");
-        }
-      };
-      
-      fetchGradient();
-    }
-  }, [parsedYaml?.display?.name, useGradientText]);
-
   const handleInputChange = (path: string, newValue: any) => {
-    if (path === 'tasks.stone.type' || path === 'tasks.stone.block' || path === 'options.category') {
-      onValueChange(path, `"${newValue}"`);
-      
-      if (path === 'tasks.stone.block') {
-        onValueChange('display.type', `"${newValue}"`);
-      }
-    } else {
-      onValueChange(path, newValue);
-    }
-    
-    if (path === 'options.category') {
-      setActiveCategory(newValue);
-    }
+    onValueChange(path, newValue);
   };
 
   const formatNumber = (value: number): string => {
@@ -97,10 +53,6 @@ const YamlForm: React.FC<YamlFormProps> = ({
       return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'}`;
     }
     return `${value} ${value === 1 ? 'second' : 'seconds'}`;
-  };
-
-  const handleCategorySelect = (category: string) => {
-    handleInputChange('options.category', category);
   };
 
   if (!parsedYaml) {
@@ -166,9 +118,6 @@ const YamlForm: React.FC<YamlFormProps> = ({
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-muted-foreground">
-                        Task type determines what the player needs to do
-                      </p>
                     </div>
                     
                     <div className="space-y-2">
@@ -223,9 +172,6 @@ const YamlForm: React.FC<YamlFormProps> = ({
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-muted-foreground">
-                        This will also update the display type
-                      </p>
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -292,36 +238,9 @@ const YamlForm: React.FC<YamlFormProps> = ({
                             className="input-field"
                           />
                           <div className="mt-2 p-2 border rounded-md bg-background/50">
-                            <p className="text-sm text-muted-foreground mb-1">Gradient Preview:</p>
+                            <p className="text-sm text-muted-foreground mb-1">Preview:</p>
                             <div className={getGradientText("Wood Gathering Task", gradients.wood)}>
                               {parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
-                            </div>
-                            
-                            {gradientPreview && (
-                              <div className="mt-2">
-                                <p className="text-sm text-muted-foreground mb-1">BirdFlop API Preview:</p>
-                                <div className="break-words" dangerouslySetInnerHTML={{ __html: gradientPreview }} />
-                              </div>
-                            )}
-                            
-                            <div className="flex justify-end mt-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={async () => {
-                                  try {
-                                    const cleanName = parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '');
-                                    const result = await getBirdflopGradient(cleanName);
-                                    handleInputChange('display.name', result);
-                                    toast.success('Updated with BirdFlop gradient');
-                                  } catch (error) {
-                                    console.error(error);
-                                    toast.error('Failed to apply gradient');
-                                  }
-                                }}
-                              >
-                                Apply BirdFlop Gradient
-                              </Button>
                             </div>
                           </div>
                         </div>
@@ -352,9 +271,6 @@ const YamlForm: React.FC<YamlFormProps> = ({
                           ))}
                         </SelectContent>
                       </Select>
-                      <p className="text-xs text-muted-foreground">
-                        The block icon shown for this task
-                      </p>
                     </div>
                     
                     <Separator className="my-2" />
@@ -394,74 +310,26 @@ const YamlForm: React.FC<YamlFormProps> = ({
                 <CardContent className="space-y-6">
                   <div className="grid gap-4">
                     <div className="space-y-2">
-                      <Label>Reward Commands</Label>
-                      
-                      {Array.isArray(parsedYaml.rewards) && parsedYaml.rewards.map((reward, index) => (
-                        <div key={index} className="flex items-center space-x-2 my-2">
-                          <RewardCustomizer 
-                            rewardString={reward}
-                            onChange={(newReward) => {
-                              const newRewards = [...(parsedYaml.rewards || [])];
-                              newRewards[index] = newReward;
-                              handleInputChange('rewards', newRewards);
-                            }}
-                          />
-                          
-                          <div className="flex flex-col space-y-1">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => {
-                                if (index > 0) {
-                                  const newRewards = [...(parsedYaml.rewards || [])];
-                                  [newRewards[index], newRewards[index - 1]] = [newRewards[index - 1], newRewards[index]];
-                                  handleInputChange('rewards', newRewards);
-                                }
-                              }}
-                              disabled={index === 0}
-                            >
-                              <ArrowUp className="h-4 w-4" />
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => {
-                                if (index < (parsedYaml.rewards || []).length - 1) {
-                                  const newRewards = [...(parsedYaml.rewards || [])];
-                                  [newRewards[index], newRewards[index + 1]] = [newRewards[index + 1], newRewards[index]];
-                                  handleInputChange('rewards', newRewards);
-                                }
-                              }}
-                              disabled={index === (parsedYaml.rewards || []).length - 1}
-                            >
-                              <ArrowDown className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                      
-                      <Button
-                        variant="outline"
-                        className="w-full mt-2"
-                        onClick={() => {
-                          const newRewards = [...(parsedYaml.rewards || []), 'eco give {player} 100'];
-                          handleInputChange('rewards', newRewards);
-                        }}
-                      >
-                        Add Reward
-                      </Button>
+                      <Label htmlFor="rewards">Rewards (Commands)</Label>
+                      <Textarea 
+                        id="rewards" 
+                        value={parsedYaml.rewards?.join('\n') || ''}
+                        onChange={(e) => handleInputChange('rewards', e.target.value.split('\n'))}
+                        className="input-field min-h-[100px]"
+                        placeholder="Enter each reward command on a new line"
+                      />
                     </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="rewardMessages">Reward Messages</Label>
                       <Textarea 
                         id="rewardMessages" 
-                        value={Array.isArray(parsedYaml.rewardstring) ? parsedYaml.rewardstring.join('\n') : ''}
+                        value={parsedYaml.rewardstring?.join('\n') || ''}
                         onChange={(e) => handleInputChange('rewardstring', e.target.value.split('\n'))}
                         className="input-field min-h-[100px]"
                         placeholder="Enter each reward message on a new line"
                       />
-                      {useGradientText && Array.isArray(parsedYaml.rewardstring) && parsedYaml.rewardstring.length > 0 && (
+                      {useGradientText && parsedYaml.rewardstring?.length > 0 && (
                         <div className="mt-2 p-2 border rounded-md bg-background/50">
                           <p className="text-sm text-muted-foreground mb-1">Preview:</p>
                           <div className={getGradientText("Task completed!", gradients.blue)}>
@@ -487,35 +355,12 @@ const YamlForm: React.FC<YamlFormProps> = ({
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="category">Category</Label>
-                      {settings?.categories && settings.categories.length > 0 ? (
-                        <div className="space-y-4">
-                          <Select 
-                            value={parsedYaml.options?.category || ''}
-                            onValueChange={(value) => handleInputChange('options.category', value)}
-                          >
-                            <SelectTrigger id="category" className="w-full">
-                              <SelectValue placeholder="Select category" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {settings.categories.map((category) => (
-                                <SelectItem key={category} value={category}>
-                                  {category}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <p className="text-xs text-muted-foreground">
-                            Categories can be managed in Settings → Advanced
-                          </p>
-                        </div>
-                      ) : (
-                        <Input 
-                          id="category" 
-                          value={parsedYaml.options?.category || ''}
-                          onChange={(e) => handleInputChange('options.category', e.target.value)}
-                          className="input-field"
-                        />
-                      )}
+                      <Input 
+                        id="category" 
+                        value={parsedYaml.options?.category || ''}
+                        onChange={(e) => handleInputChange('options.category', e.target.value)}
+                        className="input-field"
+                      />
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -560,50 +405,21 @@ const YamlForm: React.FC<YamlFormProps> = ({
                     )}
                     
                     <div className="space-y-2">
-                      <Label htmlFor="sortOrder">Sort Order</Label>
-                      {settings?.useNumberInputForSort ? (
-                        <Input
-                          id="sortOrder"
-                          type="number"
-                          min={1}
-                          max={100}
-                          value={parsedYaml.options?.['sort-order'] || 1}
-                          onChange={(e) => handleInputChange('options.sort-order', parseInt(e.target.value) || 1)}
-                          className="input-field"
-                        />
-                      ) : (
-                        <>
-                          <Badge variant="outline" className="mb-2 ml-1 text-xs">
-                            {parsedYaml.options?.['sort-order'] || 1}
-                          </Badge>
-                          <Slider 
-                            id="sortOrder"
-                            min={1}
-                            max={100}
-                            step={1}
-                            value={[parsedYaml.options?.['sort-order'] || 1]}
-                            onValueChange={(values) => handleInputChange('options.sort-order', values[0])}
-                          />
-                        </>
-                      )}
-                      <p className="text-xs text-muted-foreground">
-                        Controls the order tasks appear in the menu
-                      </p>
-                    </div>
-                    
-                    {settings?.saveFilenamePatternsEnabled && (
-                      <div className="mt-4 p-3 border rounded-md bg-muted/30">
-                        <h3 className="text-sm font-medium mb-2">Suggested Filename</h3>
-                        <p className="text-xs text-muted-foreground mb-1">
-                          Based on your task configuration:
-                        </p>
-                        <Badge className="text-xs">
-                          {
-                            `${parsedYaml.options?.category?.[0] || 'T'}${parsedYaml.options?.['sort-order'] || 1}_${parsedYaml.display?.type || 'task'}.yaml`
-                          }
+                      <Label htmlFor="sortOrder">
+                        Sort Order
+                        <Badge variant="outline" className="ml-2 text-xs">
+                          {parsedYaml.options?.['sort-order'] || 1}
                         </Badge>
-                      </div>
-                    )}
+                      </Label>
+                      <Slider 
+                        id="sortOrder"
+                        min={1}
+                        max={100}
+                        step={1}
+                        value={[parsedYaml.options?.['sort-order'] || 1]}
+                        onValueChange={(values) => handleInputChange('options.sort-order', values[0])}
+                      />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
