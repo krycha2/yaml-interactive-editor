@@ -1,15 +1,11 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import * as monaco from 'monaco-editor';
 import { Separator } from '@/components/ui/separator';
 import { defaultYaml } from '@/utils/yamlUtils';
 
-// Add Monaco editor types
 declare global {
   interface Window {
-    MonacoEnvironment?: {
-      getWorkerUrl: (moduleId: string, label: string) => string;
-    };
+    MonacoEnvironment?: monaco.Environment;
   }
 }
 
@@ -25,11 +21,9 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
   const monacoEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [isMounted, setIsMounted] = useState(false);
 
-  // Initialize Monaco editor
   useEffect(() => {
     if (!editorRef.current) return;
     
-    // Set up Monaco environment
     window.MonacoEnvironment = {
       getWorkerUrl: function (moduleId: string, label: string) {
         if (label === 'yaml') {
@@ -39,12 +33,10 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
       }
     };
 
-    // Register YAML language if not already registered
     if (!monaco.languages.getLanguages().some(lang => lang.id === 'yaml')) {
       monaco.languages.register({ id: 'yaml' });
     }
 
-    // Create editor instance
     const editor = monaco.editor.create(editorRef.current, {
       value: value || defaultYaml,
       language: 'yaml',
@@ -76,23 +68,19 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
       overviewRulerBorder: false,
     });
 
-    // Handle content change
     editor.onDidChangeModelContent(() => {
       const newValue = editor.getValue();
       onChange(newValue);
     });
 
-    // Store editor reference
     monacoEditorRef.current = editor;
     setIsMounted(true);
 
-    // Cleanup
     return () => {
       editor.dispose();
     };
   }, [theme]);
 
-  // Update editor content if value changes externally
   useEffect(() => {
     if (monacoEditorRef.current && isMounted) {
       const currentValue = monacoEditorRef.current.getValue();
@@ -102,7 +90,6 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
     }
   }, [value, isMounted]);
 
-  // Update editor theme when it changes
   useEffect(() => {
     if (monacoEditorRef.current && isMounted) {
       monaco.editor.setTheme(theme);
