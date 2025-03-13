@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -14,7 +13,7 @@ import { YamlData, parseYaml, getValueAtPath } from '@/utils/yamlUtils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { taskTypes, blockTypes } from '@/data/typeDatabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getGradientText, gradients } from '@/utils/gradientUtils';
+import { getGradientText, gradients, getGradientTextJSX } from '@/utils/gradientUtils';
 
 interface YamlFormProps {
   yamlString: string;
@@ -27,7 +26,6 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
   const [activeTab, setActiveTab] = useState("tasks");
   const [error, setError] = useState<string | null>(null);
 
-  // Parse YAML when it changes
   useEffect(() => {
     try {
       const parsed = parseYaml(yamlString);
@@ -39,12 +37,10 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
     }
   }, [yamlString]);
 
-  // Handle input changes
   const handleInputChange = (path: string, newValue: any) => {
     onValueChange(path, newValue);
   };
 
-  // Format number for display
   const formatNumber = (value: number): string => {
     if (value >= 86400) {
       const days = Math.floor(value / 86400);
@@ -95,7 +91,6 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            {/* Tasks Tab */}
             <TabsContent value="tasks" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">
@@ -222,7 +217,6 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
               </Card>
             </TabsContent>
 
-            {/* Display Tab */}
             <TabsContent value="display" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">
@@ -305,7 +299,6 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
               </Card>
             </TabsContent>
 
-            {/* Rewards Tab */}
             <TabsContent value="rewards" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">
@@ -350,7 +343,6 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
               </Card>
             </TabsContent>
 
-            {/* Options Tab */}
             <TabsContent value="options" className="mt-0">
               <Card className="border-0 shadow-apple-subtle">
                 <CardHeader className="pb-4">

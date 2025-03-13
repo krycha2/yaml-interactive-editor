@@ -24,16 +24,13 @@ export const createMinecraftGradient = (text: string, startColor: string, endCol
   return `bg-gradient-to-r from-[${startColor}] to-[${endColor}] bg-clip-text text-transparent`;
 };
 
-// Component for gradient text (to be used in React)
-export const GradientText = ({
-  text,
-  gradient = 'from-violet-500 to-fuchsia-500',
-  className = '',
-}: {
-  text: string;
-  gradient?: string;
-  className?: string;
-}) => {
+// Export a function that returns the JSX for gradient text
+// This avoids using JSX directly in this .ts file
+export const getGradientTextJSX = (
+  text: string,
+  gradient: string = 'from-violet-500 to-fuchsia-500',
+  className: string = ''
+): { className: string, text: string } => {
   const gradientClass = `bg-gradient-to-r ${gradient} bg-clip-text text-transparent ${className}`;
-  return <span className={gradientClass}>{text}</span>;
+  return { className: gradientClass, text };
 };
