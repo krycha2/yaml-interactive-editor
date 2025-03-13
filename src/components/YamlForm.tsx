@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -13,7 +14,8 @@ import { YamlData, parseYaml, getValueAtPath } from '@/utils/yamlUtils';
 import { AnimatePresence, motion } from 'framer-motion';
 import { taskTypes, blockTypes } from '@/data/typeDatabase';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getGradientText, gradients, getGradientTextJSX } from '@/utils/gradientUtils';
+import { getGradientText, gradients } from '@/utils/gradientUtils';
+import GradientPreview from './GradientPreview';
 
 interface YamlFormProps {
   yamlString: string;
@@ -229,28 +231,23 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="displayName">Display Name</Label>
-                      {useGradientText ? (
-                        <div className="relative">
-                          <Input 
-                            id="displayName" 
-                            value={parsedYaml.display.name || ''}
-                            onChange={(e) => handleInputChange('display.name', e.target.value)}
-                            className="input-field"
+                      <Input 
+                        id="displayName" 
+                        value={parsedYaml.display.name || ''}
+                        onChange={(e) => handleInputChange('display.name', e.target.value)}
+                        className="input-field"
+                      />
+                      {useGradientText && (
+                        <div className="mt-2">
+                          <p className="text-sm text-muted-foreground mb-1">Gradient Preview:</p>
+                          <GradientPreview 
+                            text={parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
+                            initialOptions={{
+                              colors: ['#FFFF55', '#FF5555', '#AA0000'],
+                              bold: true
+                            }}
                           />
-                          <div className="mt-2 p-2 border rounded-md bg-background/50">
-                            <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                            <div className={getGradientText("Wood Gathering Task", gradients.wood)}>
-                              {parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
-                            </div>
-                          </div>
                         </div>
-                      ) : (
-                        <Input 
-                          id="displayName" 
-                          value={parsedYaml.display.name || ''}
-                          onChange={(e) => handleInputChange('display.name', e.target.value)}
-                          className="input-field"
-                        />
                       )}
                     </div>
                     
@@ -330,12 +327,15 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradi
                         placeholder="Enter each reward message on a new line"
                       />
                       {useGradientText && parsedYaml.rewardstring?.length > 0 && (
-                        <div className="mt-2 p-2 border rounded-md bg-background/50">
-                          <p className="text-sm text-muted-foreground mb-1">Preview:</p>
-                          <div className={getGradientText("Task completed!", gradients.blue)}>
-                            {parsedYaml.rewardstring[0].replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
-                          </div>
-                        </div>
+                        <GradientPreview 
+                          text={parsedYaml.rewardstring[0].replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
+                          initialOptions={{
+                            colors: ['#55FFFF', '#5555FF'],
+                            bold: true,
+                            italic: true
+                          }}
+                          className="mt-2"
+                        />
                       )}
                     </div>
                   </div>

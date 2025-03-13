@@ -7,9 +7,7 @@ import { defaultYaml } from '@/utils/yamlUtils';
 // Add Monaco editor types
 declare global {
   interface Window {
-    MonacoEnvironment?: {
-      getWorkerUrl: (moduleId: string, label: string) => string;
-    };
+    MonacoEnvironment?: monaco.Environment;
   }
 }
 
@@ -24,6 +22,7 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
   const editorRef = useRef<HTMLDivElement>(null);
   const monacoEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Initialize Monaco editor
   useEffect(() => {
@@ -85,6 +84,7 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
     // Store editor reference
     monacoEditorRef.current = editor;
     setIsMounted(true);
+    setIsLoading(false);
 
     // Cleanup
     return () => {
@@ -121,16 +121,22 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme
         <div className="w-14"></div>
       </div>
       <Separator />
-      <div 
-        ref={editorRef} 
-        className="w-full flex-1" 
-        style={{ 
-          height, 
-          overflow: "hidden",
-          borderRadius: "0 0 var(--radius) var(--radius)",
-          background: "var(--editor-bg)"
-        }}
-      />
+      {isLoading ? (
+        <div className="w-full bg-black text-white flex-1 flex items-center justify-center" style={{ height }}>
+          <p className="text-lg">Loading Editor...</p>
+        </div>
+      ) : (
+        <div 
+          ref={editorRef} 
+          className="w-full flex-1" 
+          style={{ 
+            height, 
+            overflow: "hidden",
+            borderRadius: "0 0 var(--radius) var(--radius)",
+            background: "var(--editor-bg)"
+          }}
+        />
+      )}
     </div>
   );
 };
