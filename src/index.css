@@ -34,6 +34,9 @@
     --ring: 211 100% 45%;
 
     --radius: 12px;
+
+    --editor-bg: #f8f9fa;
+    --editor-border: #e2e8f0;
   }
 
   .dark {
@@ -64,6 +67,9 @@
     --border: 240 4% 16%;
     --input: 240 4% 16%;
     --ring: 211 100% 45%;
+
+    --editor-bg: #1e1e1e;
+    --editor-border: #2d2d2d;
   }
 }
 
@@ -161,5 +167,37 @@
   
   .card-hover {
     @apply transition-all duration-300 hover:shadow-apple-hover hover:-translate-y-1;
+  }
+
+  .text-gradient {
+    @apply bg-clip-text text-transparent;
+  }
+
+  .gradient-wood {
+    @apply bg-gradient-to-r from-wood-800 via-wood-700 to-wood-600 bg-clip-text text-transparent;
+  }
+
+  .gradient-blue {
+    @apply bg-gradient-to-r from-blue-600 via-blue-500 to-sky-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-green {
+    @apply bg-gradient-to-r from-green-600 via-green-500 to-emerald-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-purple {
+    @apply bg-gradient-to-r from-violet-600 via-purple-500 to-fuchsia-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-red {
+    @apply bg-gradient-to-r from-red-600 via-rose-500 to-pink-400 bg-clip-text text-transparent;
+  }
+
+  .gradient-orange {
+    @apply bg-gradient-to-r from-amber-600 via-orange-500 to-yellow-400 bg-clip-text text-transparent;
+  }
+
+  .dark .glass-panel {
+    @apply bg-gray-900/80 backdrop-blur-md border border-gray-800/50;
   }
 }

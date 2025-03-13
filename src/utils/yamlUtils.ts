@@ -82,6 +82,8 @@ export function extractValuesFromYaml(yamlString: string): Partial<YamlData> {
       display: {
         name: data.display.name,
         type: data.display.type,
+        'lore-normal': data.display['lore-normal'],
+        'lore-started': data.display['lore-started']
       },
     };
   } catch (error) {

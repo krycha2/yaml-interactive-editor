@@ -64,12 +64,36 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				editor: {
-					bg: '#f8f9fa',
-					border: '#e2e8f0',
+					bg: 'var(--editor-bg)',
+					border: 'var(--editor-border)',
 				},
 				appleBlue: '#0071e3',
 				appleDarkGray: '#1d1d1f',
 				appleLightGray: '#f5f5f7',
+        wood: {
+          100: '#f8f3e7',
+          200: '#f0e4cc',
+          300: '#e5d4af',
+          400: '#d3bc92',
+          500: '#b9a379',
+          600: '#9c8761',
+          700: '#7d6a4a',
+          800: '#5c482c',
+          900: '#3e3019',
+        },
+        syntax: {
+          comment: '#6A9955',
+          keyword: '#569CD6',
+          string: '#CE9178',
+          variable: '#9CDCFE',
+          function: '#DCDCAA',
+          operator: '#D4D4D4',
+          class: '#4EC9B0',
+          number: '#B5CEA8',
+          property: '#9CDCFE',
+          tag: '#569CD6',
+          attribute: '#9CDCFE',
+        }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

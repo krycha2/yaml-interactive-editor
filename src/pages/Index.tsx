@@ -9,25 +9,35 @@ import { toast } from "sonner";
 import Editor from "@/components/Editor";
 import YamlForm from "@/components/YamlForm";
 import Header from "@/components/Header";
+import SettingsPanel from "@/components/SettingsPanel";
 import { defaultYaml, updateYamlValue } from "@/utils/yamlUtils";
-import { motion } from "framer-motion";
-
-// Add dependencies for animation
-import { animate, useMotionValue } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 const Index = () => {
   const [yamlContent, setYamlContent] = useState(defaultYaml);
   const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("editor");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settings, setSettings] = useState({
+    darkMode: false,
+    editorTheme: 'vs-light',
+    gradientTextEnabled: true
+  });
   const isMobile = useIsMobile();
   
-  // Animation properties
-  const opacity = useMotionValue(0);
-  
+  // Apply dark mode effect
   useEffect(() => {
-    // Simulate loading time for a smooth entrance
+    if (settings.darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [settings.darkMode]);
+  
+  // Simulate loading time for a smooth entrance
+  useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
-      animate(opacity, 1, { duration: 0.8 });
     }, 300);
     
     return () => clearTimeout(timer);
@@ -101,6 +111,10 @@ const Index = () => {
       toast.error("Failed to copy YAML");
     }
   };
+
+  const handleSettingsChange = (newSettings: typeof settings) => {
+    setSettings(newSettings);
+  };
   
   if (loading) {
     return (
@@ -114,16 +128,21 @@ const Index = () => {
   }
   
   return (
-    <motion.div 
-      className="min-h-screen bg-background flex flex-col"
-      style={{ opacity }}
-    >
+    <div className="min-h-screen bg-background flex flex-col">
       <Toaster position="top-right" />
       
       <Header 
         onExport={handleExport}
         onImport={handleImport}
         onCopy={handleCopy}
+        onOpenSettings={() => setSettingsOpen(true)}
+      />
+      
+      <SettingsPanel 
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        settings={settings}
+        onSettingsChange={handleSettingsChange}
       />
       
       {isMobile ? (
@@ -146,19 +165,42 @@ const Index = () => {
             </Button>
           </div>
           
-          {activeTab === 'editor' ? (
-            <div className="h-[calc(100vh-120px)]">
-              <Editor 
-                value={yamlContent} 
-                onChange={setYamlContent}
-                height="calc(100vh - 120px)"
-              />
-            </div>
-          ) : (
-            <ScrollArea className="h-[calc(100vh-120px)] p-1">
-              <YamlForm yamlString={yamlContent} onValueChange={handleFormValueChange} />
-            </ScrollArea>
-          )}
+          <AnimatePresence mode="wait">
+            {activeTab === 'editor' ? (
+              <motion.div
+                key="editor"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                className="h-[calc(100vh-120px)]"
+              >
+                <Editor 
+                  value={yamlContent} 
+                  onChange={setYamlContent}
+                  height="calc(100vh - 120px)"
+                  theme={settings.darkMode ? 'vs-dark' : 'vs-light'}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                key="form"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                className="h-[calc(100vh-120px)]"
+              >
+                <ScrollArea className="h-[calc(100vh-120px)] p-1">
+                  <YamlForm 
+                    yamlString={yamlContent} 
+                    onValueChange={handleFormValueChange} 
+                    useGradientText={settings.gradientTextEnabled}
+                  />
+                </ScrollArea>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       ) : (
         // Desktop layout with panels
@@ -167,19 +209,27 @@ const Index = () => {
           className="min-h-[calc(100vh-58px)]"
         >
           <ResizablePanel defaultSize={50} minSize={30} className="p-4">
-            <Editor value={yamlContent} onChange={setYamlContent} />
+            <Editor 
+              value={yamlContent} 
+              onChange={setYamlContent} 
+              theme={settings.darkMode ? 'vs-dark' : 'vs-light'}
+            />
           </ResizablePanel>
           
           <ResizableHandle withHandle />
           
           <ResizablePanel defaultSize={50} minSize={30} className="p-4">
             <ScrollArea className="h-[calc(100vh-74px)]">
-              <YamlForm yamlString={yamlContent} onValueChange={handleFormValueChange} />
+              <YamlForm 
+                yamlString={yamlContent} 
+                onValueChange={handleFormValueChange} 
+                useGradientText={settings.gradientTextEnabled}
+              />
             </ScrollArea>
           </ResizablePanel>
         </ResizablePanelGroup>
       )}
-    </motion.div>
+    </div>
   );
 };
 

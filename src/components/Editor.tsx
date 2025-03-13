@@ -7,7 +7,9 @@ import { defaultYaml } from '@/utils/yamlUtils';
 // Add Monaco editor types
 declare global {
   interface Window {
-    MonacoEnvironment: any;
+    MonacoEnvironment?: {
+      getWorkerUrl: (moduleId: string, label: string) => string;
+    };
   }
 }
 
@@ -15,9 +17,10 @@ interface EditorProps {
   value: string;
   onChange: (value: string) => void;
   height?: string;
+  theme?: string;
 }
 
-const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh" }) => {
+const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh", theme = "vs-light" }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const monacoEditorRef = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
   const [isMounted, setIsMounted] = useState(false);
@@ -46,7 +49,7 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh" }) => 
       value: value || defaultYaml,
       language: 'yaml',
       automaticLayout: true,
-      theme: 'vs-light',
+      theme: theme,
       minimap: { enabled: false },
       scrollBeyondLastLine: false,
       fontSize: 14,
@@ -87,7 +90,7 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh" }) => 
     return () => {
       editor.dispose();
     };
-  }, []);
+  }, [theme]);
 
   // Update editor content if value changes externally
   useEffect(() => {
@@ -98,6 +101,13 @@ const Editor: React.FC<EditorProps> = ({ value, onChange, height = "80vh" }) => 
       }
     }
   }, [value, isMounted]);
+
+  // Update editor theme when it changes
+  useEffect(() => {
+    if (monacoEditorRef.current && isMounted) {
+      monaco.editor.setTheme(theme);
+    }
+  }, [theme, isMounted]);
 
   return (
     <div className="flex flex-col h-full rounded-lg overflow-hidden animate-blur-in">

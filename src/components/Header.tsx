@@ -9,9 +9,10 @@ interface HeaderProps {
   onExport: () => void;
   onImport: () => void;
   onCopy: () => void;
+  onOpenSettings: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onExport, onImport, onCopy }) => {
+const Header: React.FC<HeaderProps> = ({ onExport, onImport, onCopy, onOpenSettings }) => {
   return (
     <header className="sticky top-0 z-10 w-full bg-background/80 backdrop-blur-md border-b border-border py-3 px-4 sm:px-6">
       <div className="flex items-center justify-between">
@@ -21,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ onExport, onImport, onCopy }) => {
             <h1 className="text-lg font-medium">YAML Interactive Editor</h1>
           </div>
           <Badge variant="outline" className="bg-secondary/50">
-            v1.0
+            v1.0.2
           </Badge>
         </div>
         
@@ -61,6 +62,7 @@ const Header: React.FC<HeaderProps> = ({ onExport, onImport, onCopy }) => {
           <Button 
             variant="default" 
             size="sm"
+            onClick={onOpenSettings}
             className="bg-appleBlue hover:bg-appleBlue/90 flex items-center"
           >
             <Settings className="h-4 w-4 mr-1" />

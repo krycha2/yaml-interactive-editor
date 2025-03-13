@@ -12,13 +12,17 @@ import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { YamlData, parseYaml, getValueAtPath } from '@/utils/yamlUtils';
 import { AnimatePresence, motion } from 'framer-motion';
+import { taskTypes, blockTypes } from '@/data/typeDatabase';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { getGradientText, gradients } from '@/utils/gradientUtils';
 
 interface YamlFormProps {
   yamlString: string;
   onValueChange: (path: string, value: any) => void;
+  useGradientText?: boolean;
 }
 
-const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
+const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange, useGradientText = true }) => {
   const [parsedYaml, setParsedYaml] = useState<YamlData | null>(null);
   const [activeTab, setActiveTab] = useState("tasks");
   const [error, setError] = useState<string | null>(null);
@@ -104,12 +108,21 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="taskType">Task Type</Label>
-                      <Input 
-                        id="taskType" 
+                      <Select 
                         value={parsedYaml.tasks.stone.type || ''}
-                        onChange={(e) => handleInputChange('tasks.stone.type', e.target.value)}
-                        className="input-field"
-                      />
+                        onValueChange={(value) => handleInputChange('tasks.stone.type', value)}
+                      >
+                        <SelectTrigger id="taskType" className="w-full">
+                          <SelectValue placeholder="Select task type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {taskTypes.map((type) => (
+                            <SelectItem key={type.id} value={type.id}>
+                              {type.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <div className="space-y-2">
@@ -131,12 +144,39 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
                     
                     <div className="space-y-2">
                       <Label htmlFor="block">Block Type</Label>
-                      <Input 
-                        id="block" 
+                      <Select 
                         value={parsedYaml.tasks.stone.block || ''}
-                        onChange={(e) => handleInputChange('tasks.stone.block', e.target.value)}
-                        className="input-field"
-                      />
+                        onValueChange={(value) => handleInputChange('tasks.stone.block', value)}
+                      >
+                        <SelectTrigger id="block" className="w-full">
+                          <SelectValue placeholder="Select block type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Object.entries(blockTypes.reduce((acc, block) => {
+                            if (!acc[block.category]) acc[block.category] = [];
+                            acc[block.category].push(block);
+                            return acc;
+                          }, {} as Record<string, typeof blockTypes>)).map(([category, blocks]) => (
+                            <React.Fragment key={category}>
+                              <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                                {category}
+                              </div>
+                              {blocks.map((block) => (
+                                <SelectItem key={block.id} value={block.id}>
+                                  {block.name}
+                                </SelectItem>
+                              ))}
+                              {category !== Object.keys(blockTypes.reduce((acc, block) => {
+                                if (!acc[block.category]) acc[block.category] = [];
+                                acc[block.category].push(block);
+                                return acc;
+                              }, {} as Record<string, typeof blockTypes>)).pop() && (
+                                <Separator className="my-1" />
+                              )}
+                            </React.Fragment>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <div className="flex items-center justify-between">
@@ -195,22 +235,48 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
                   <div className="grid gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="displayName">Display Name</Label>
-                      <Input 
-                        id="displayName" 
-                        value={parsedYaml.display.name || ''}
-                        onChange={(e) => handleInputChange('display.name', e.target.value)}
-                        className="input-field"
-                      />
+                      {useGradientText ? (
+                        <div className="relative">
+                          <Input 
+                            id="displayName" 
+                            value={parsedYaml.display.name || ''}
+                            onChange={(e) => handleInputChange('display.name', e.target.value)}
+                            className="input-field"
+                          />
+                          <div className="mt-2 p-2 border rounded-md bg-background/50">
+                            <p className="text-sm text-muted-foreground mb-1">Preview:</p>
+                            <div className={getGradientText("Wood Gathering Task", gradients.wood)}>
+                              {parsedYaml.display.name.replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
+                            </div>
+                          </div>
+                        </div>
+                      ) : (
+                        <Input 
+                          id="displayName" 
+                          value={parsedYaml.display.name || ''}
+                          onChange={(e) => handleInputChange('display.name', e.target.value)}
+                          className="input-field"
+                        />
+                      )}
                     </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="displayType">Display Type</Label>
-                      <Input 
-                        id="displayType" 
+                      <Select 
                         value={parsedYaml.display.type || ''}
-                        onChange={(e) => handleInputChange('display.type', e.target.value)}
-                        className="input-field"
-                      />
+                        onValueChange={(value) => handleInputChange('display.type', value)}
+                      >
+                        <SelectTrigger id="displayType" className="w-full">
+                          <SelectValue placeholder="Select display type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {blockTypes.map((block) => (
+                            <SelectItem key={block.id} value={block.id}>
+                              {block.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                     
                     <Separator className="my-2" />
@@ -270,6 +336,14 @@ const YamlForm: React.FC<YamlFormProps> = ({ yamlString, onValueChange }) => {
                         className="input-field min-h-[100px]"
                         placeholder="Enter each reward message on a new line"
                       />
+                      {useGradientText && parsedYaml.rewardstring?.length > 0 && (
+                        <div className="mt-2 p-2 border rounded-md bg-background/50">
+                          <p className="text-sm text-muted-foreground mb-1">Preview:</p>
+                          <div className={getGradientText("Task completed!", gradients.blue)}>
+                            {parsedYaml.rewardstring[0].replace(/&[0-9a-fk-or]|&#[0-9a-f]{6}/gi, '')}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>
