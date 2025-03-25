@@ -122,13 +122,14 @@ export const generateGradientHTML = (gradientChars: GradientCharacter[]): React.
     
     // Skip rendering spaces with complex styles
     if (char === ' ') {
-      return <span key={index}>&nbsp;</span>;
+      return { type: 'span', key: index, props: { children: '\u00A0' } };
     }
     
-    return (
-      <span
-        key={index}
-        style={{
+    return {
+      type: 'span',
+      key: index,
+      props: {
+        style: {
           color,
           fontWeight: bold ? 'bold' : 'normal',
           fontStyle: italic ? 'italic' : 'normal',
@@ -138,11 +139,10 @@ export const generateGradientHTML = (gradientChars: GradientCharacter[]): React.
           ].filter(Boolean).join(' '),
           display: 'inline-block',
           transition: 'all 0.3s ease',
-        }}
-      >
-        {char}
-      </span>
-    );
+        },
+        children: char
+      }
+    };
   });
 };
 
